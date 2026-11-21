@@ -1,0 +1,1 @@
+Break the research question into 2–5 searchable subquestions. Return JSON with a queries array of short strings and a plan array of steps.

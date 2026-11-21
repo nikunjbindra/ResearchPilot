@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ResearchPilot</title><link rel="stylesheet" href="/style.css"><script defer src="/app.js"></script></head><body>
+<header><b>ResearchPilot</b><i></i><a href="#workspace">Workspace ↗</a></header>
+<main id="landing"><h1>Follow the<br><em>evidence.</em></h1><div class="story">
+<article><small>Select a finding</small><h2>Feedback and learning</h2><p>Students finished the task faster. <sup>[1]</sup></p></article>
+<article><small>Reveal the passage</small><h2>Feedback study</h2><p>Page 4</p><div class="rule"></div><p>“Students completed the task in less time.”</p></article>
+<article><small>Read in context</small><h2>Source passage</h2><p><mark>Students completed the task in less time.</mark></p><small>Illustrative excerpt</small></article></div>
+<a class="start" href="#workspace">Start research <span>↗</span></a></main>
+<main id="workspace" hidden><h1>Research workspace</h1><form class="paper" id="research"><label for="question">Research question</label><textarea id="question" required rows="2" maxlength="3000" placeholder="What would you like to find out?"></textarea>
+<label>Source papers</label><div id="tray"><strong>Drop your papers here</strong><small>PDF or TXT · Up to 8 papers · 16 MB combined</small><button id="browse" type="button">Browse papers</button><input hidden type="file" id="files" multiple accept=".pdf,.txt"></div><ul id="list"></ul><button id="run">Generate report ↗</button></form>
+<div id="status" role="status"></div><button id="resume" hidden>Resume research →</button><section class="paper" id="report" hidden></section>
+<details class="paper"><summary>Experiment workspace</summary><label for="version">Workflow for next run</label><select id="version"><option value="v3">V3 · Citation review</option><option value="v2">V2 · Structured draft</option><option value="v1">V1 · Baseline</option><option value="all">Compare all versions</option></select><h2>Saved reports</h2><div id="history"></div><button id="export">Export experiment JSON</button></details></main>
+<dialog id="reader"><small>Source passage</small><h2 id="sourceTitle"></h2><p><mark id="excerpt"></mark></p><a id="original" target="_blank" rel="noopener">Open PDF ↗</a><form method="dialog"><button>Close</button></form></dialog></body></html>

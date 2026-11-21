@@ -1,0 +1,1 @@
+Compare notes across papers for agreement, disagreement and differences in study design. Keep claims tied to evidence IDs. Report when a cross-paper comparison is impossible. Return JSON with comparison and limitations arrays.

@@ -1,0 +1,2 @@
+Break the research question into 2–5 searchable subquestions. Return JSON with a queries array of short strings and a plan array of steps.
+Also return sharedDocuments: an array of document IDs only when the question exclusively asks for common features across those documents. Otherwise return []. For mixed questions plan each requested part. Build queries covering task, methods, evaluation and results as relevant.

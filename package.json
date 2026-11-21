@@ -1,0 +1,12 @@
+{
+  "name": "researchpilot",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env code/server.mjs",
+    "test": "node --test code/test.mjs"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^5.4.624"
+  }
+}
