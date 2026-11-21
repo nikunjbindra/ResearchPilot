@@ -38,7 +38,7 @@ http.createServer(async(req,res)=>{
     if(req.method==='GET' && req.url==='/'){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(await readFile(new URL('../public/index.html',import.meta.url)));return;}
     if(req.method==='GET' && ['/app.js','/style.css'].includes(req.url)){res.setHeader('Content-Type',req.url.endsWith('js')?'text/javascript':'text/css');res.end(await readFile(new URL('../public'+req.url,import.meta.url)));return;}
     if(req.method!=='POST'||req.url!=='/research'){res.writeHead(404).end();return;}
-    if(req.headers.origin && req.headers.origin!=='http://'+req.headers.host) throw Error('Invalid request origin');
+    if(req.headers.origin && req.headers.origin.replace(/^https?:\/\//,'')!==req.headers.host) throw Error('Invalid request origin');
     let size=0;const parts=[];for await(const part of req){size+=part.length;if(size>24e6) throw Error('Upload limit exceeded');parts.push(part);}
     const input=JSON.parse(Buffer.concat(parts));
     const id=input.resume||randomUUID();
