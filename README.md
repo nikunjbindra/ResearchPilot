@@ -14,11 +14,18 @@ V3 is the default. Open **Experiment workspace** to compare versions on the same
 
 ## Run locally
 
-Use Node.js 22.13 or newer. Open a terminal in the folder containing `package.json`. On Windows PowerShell, run:
+Use Node.js 22.13 or newer. Open a terminal in the folder containing `package.json`.
 
+On Windows (PowerShell):
 ```powershell
 npm.cmd install
 Copy-Item .env.example .env
+```
+
+On macOS / Linux:
+```bash
+npm install
+cp .env.example .env
 ```
 
 Open `.env` and set `GROQ_API_KEY` to your own key. The example selects Groq and the model `openai/gpt-oss-120b`. Then start the server:
@@ -27,7 +34,7 @@ Open `.env` and set `GROQ_API_KEY` to your own key. The example selects Groq and
 npm.cmd start
 ```
 
-Open **http://localhost:3737** or the address printed in the terminal if you changed `PORT`. On macOS or Linux, use `npm` and `cp .env.example .env`. The Node server handles document processing and model requests. Publishing the source on GitHub does not start that server.
+Open **http://localhost:3737** or the address printed in the terminal if you changed `PORT`. The Node server handles document processing and model requests. Publishing the source on GitHub does not start that server.
 
 ## Use the workspace
 
