@@ -5,6 +5,13 @@ import os from 'node:os';
 import path from 'node:path';
 
 export const maxDuration = 60;
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '4.5mb'
+    }
+  }
+};
 
 const busy = new Set();
 const folder = path.join(os.tmpdir(), 'researchpilot-runs');
@@ -139,24 +146,26 @@ export default async function handler(req, res) {
 
         const all = [];
         for (const [i, file] of files.entries()) {
-          let pages;
-          if (file.name.toLowerCase().endsWith('.pdf')) {
-            const { getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs');
-            const doc = await getDocument({
-              data: new Uint8Array(Buffer.from(file.data, 'base64')),
-              isEvalSupported: false
-            }).promise;
-            try {
-              pages = [];
-              for (let n = 1; n <= doc.numPages; n++) {
-                const page = await doc.getPage(n);
-                pages.push((await page.getTextContent()).items.map(x => x.str).join(' '));
+          let pages = Array.isArray(file.pages) ? file.pages : null;
+          if (!pages) {
+            if (file.name.toLowerCase().endsWith('.pdf')) {
+              const { getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs');
+              const doc = await getDocument({
+                data: new Uint8Array(Buffer.from(file.data, 'base64')),
+                isEvalSupported: false
+              }).promise;
+              try {
+                pages = [];
+                for (let n = 1; n <= doc.numPages; n++) {
+                  const page = await doc.getPage(n);
+                  pages.push((await page.getTextContent()).items.map(x => x.str).join(' '));
+                }
+              } finally {
+                await doc.destroy();
               }
-            } finally {
-              await doc.destroy();
+            } else {
+              pages = [Buffer.from(file.data, 'base64').toString('utf8')];
             }
-          } else {
-            pages = [Buffer.from(file.data, 'base64').toString('utf8')];
           }
 
           const chunks = passages(pages, 'D' + (i + 1));

@@ -54,12 +54,14 @@ http.createServer(async(req,res)=>{
     if(!question?.trim()||!Array.isArray(files)||!files.length||files.length>8) throw Error('Enter a question and select 1–8 documents.');
     const all=[];
     for(const [i,file] of files.entries()){
-      let pages;
-      if(file.name.toLowerCase().endsWith('.pdf')){
-        const {getDocument}=await import('pdfjs-dist/legacy/build/pdf.mjs');
-        const doc=await getDocument({data:new Uint8Array(Buffer.from(file.data,'base64')),isEvalSupported:false}).promise;
-        try{pages=[];for(let n=1;n<=doc.numPages;n++){const page=await doc.getPage(n);pages.push((await page.getTextContent()).items.map(x=>x.str).join(' '));}}finally{await doc.destroy();}
-      }else pages=[Buffer.from(file.data,'base64').toString('utf8')];
+      let pages = Array.isArray(file.pages) ? file.pages : null;
+      if(!pages){
+        if(file.name.toLowerCase().endsWith('.pdf')){
+          const {getDocument}=await import('pdfjs-dist/legacy/build/pdf.mjs');
+          const doc=await getDocument({data:new Uint8Array(Buffer.from(file.data,'base64')),isEvalSupported:false}).promise;
+          try{pages=[];for(let n=1;n<=doc.numPages;n++){const page=await doc.getPage(n);pages.push((await page.getTextContent()).items.map(x=>x.str).join(' '));}}finally{await doc.destroy();}
+        }else pages=[Buffer.from(file.data,'base64').toString('utf8')];
+      }
       const chunks=passages(pages,'D'+(i+1));if(!chunks.length) throw Error('No selectable text in '+file.name);
       all.push(...chunks);
     }

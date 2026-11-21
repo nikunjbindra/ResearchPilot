@@ -32,7 +32,33 @@ function show(r){const box=$('report');box.hidden=false;box.replaceChildren();co
 function history(){const h=$('history');h.replaceChildren();for(const r of [...runs].reverse()){const b=node(h,'button',r.version.toUpperCase()+' · '+r.question);b.onclick=()=>show(r)}}
 function download(blob,name){const a=document.createElement('a');const url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 $('export').onclick=()=>download(new Blob([JSON.stringify(runs,null,2)],{type:'application/json'}),'researchpilot-runs.json');
-function encode(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve({name:file.name,data:reader.result.split(',')[1]});reader.onerror=reject;reader.readAsDataURL(file)})}
+async function encode(file){
+  if(file.name.toLowerCase().endsWith('.txt')){
+    try{
+      const text=await file.text();
+      return {name:file.name,pages:[text]};
+    }catch(err){}
+  }
+  if(file.name.toLowerCase().endsWith('.pdf')){
+    try{
+      const pdfjs=await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs');
+      pdfjs.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
+      const arrayBuffer=await file.arrayBuffer();
+      const doc=await pdfjs.getDocument({data:new Uint8Array(arrayBuffer),isEvalSupported:false}).promise;
+      try{
+        const pages=[];
+        for(let n=1;n<=doc.numPages;n++){
+          const page=await doc.getPage(n);
+          pages.push((await page.getTextContent()).items.map(x=>x.str).join(' '));
+        }
+        return {name:file.name,pages};
+      }finally{await doc.destroy();}
+    }catch(err){
+      console.warn('In-browser PDF extraction fallback:',err);
+    }
+  }
+  return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve({name:file.name,data:reader.result.split(',')[1]});reader.onerror=reject;reader.readAsDataURL(file)});
+}
 async function submit(resuming){
  if(running)return;
  if(!resuming&&pending){statusText('Resume the paused report or finish it before starting another run.');return}
@@ -40,9 +66,16 @@ async function submit(resuming){
  running=true;for(const id of ['run','browse','resume','version','question'])$(id).disabled=true;list();statusText(resuming?'Resuming from the saved stage…':'Reading papers and preparing your report…');
  try{
  const input=resuming?{resume:pending.resume}:{files:await Promise.all(files.map(encode)),question:$('question').value,version:$('version').value};
- const res=await fetch('/research',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});const data=await res.json();
+ const res=await fetch('/research',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});
+ const rawText=await res.text();
+ let data;
+ try{
+   data=JSON.parse(rawText);
+ }catch{
+   throw Error(rawText.length<150?rawText:'Request failed with status '+res.status);
+ }
  if(res.status===429&&data.resume){pending={resume:data.resume,error:data.error,stage:data.stage,draft:data.draft};localStorage.setItem('researchpilot-pending',JSON.stringify(pending));if(data.draft)show({...data.draft,pending:true});statusText('Paused at '+stageName(data.stage)+'. '+data.error);return}
- if(!res.ok)throw Error(data.error);
+ if(!res.ok)throw Error(data.error||'Request failed ('+res.status+')');
  pending=null;localStorage.removeItem('researchpilot-pending');const reports=data.reports||[data];
  for(const r of reports){if(!resuming)links.set(r,files.map(f=>f.name.toLowerCase().endsWith('.pdf')?URL.createObjectURL(f):null));runs.push(r)}
  show(reports.at(-1));history();statusText('Report ready.');localStorage.setItem('researchpilot-runs',JSON.stringify(runs));
