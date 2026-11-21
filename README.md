@@ -2,6 +2,8 @@
 
 ResearchPilot helps you answer a question across research papers and trace each finding to the passage behind it. Upload searchable PDFs or text files, ask a question, and click a citation to read the evidence in context.
 
+**Live Prototype:** [https://researchpilot-six.vercel.app/](https://researchpilot-six.vercel.app/)
+
 ## Prompt engineering workflows
 
 | Version | Purpose | How it works |
